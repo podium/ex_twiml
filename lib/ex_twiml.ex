@@ -75,6 +75,7 @@ defmodule ExTwiml do
     :dial,
     :message,
     :task,
+    :connect,
 
     # Non-nested
     :say,
@@ -89,7 +90,8 @@ defmodule ExTwiml do
     :redirect,
     :body,
     :media,
-    :identity
+    :identity,
+    :stream
   ]
 
   @simple_verbs [:leave, :hangup, :reject, :pause, :record, :parameter]
