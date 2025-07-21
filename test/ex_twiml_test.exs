@@ -399,6 +399,281 @@ defmodule ExTwimlTest do
     assert_twiml(markup, "<Mms to=\"112345&apos;\">hello</Mms>")
   end
 
+  test "can render the <Start> verb with <Stream>" do
+    markup =
+      twiml do
+        start do
+          stream url: "wss://example.com/audio" do
+          end
+        end
+      end
+
+    assert_twiml(markup, "<Start><Stream url=\"wss://example.com/audio\"></Stream></Start>")
+  end
+
+  test "can render the <Connect> verb with <Stream>" do
+    markup =
+      twiml do
+        connect do
+          stream url: "wss://example.com/audio" do
+          end
+        end
+      end
+
+    assert_twiml(markup, "<Connect><Stream url=\"wss://example.com/audio\"></Stream></Connect>")
+  end
+
+  test "can render <Stream> with all attributes" do
+    markup =
+      twiml do
+        start do
+          stream url: "wss://example.com/audio",
+                 name: "my_stream",
+                 track: "both_tracks",
+                 status_callback: "https://example.com/callback",
+                 status_callback_method: "GET" do
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Stream url=\"wss://example.com/audio\" name=\"my_stream\" track=\"both_tracks\" statusCallback=\"https://example.com/callback\" statusCallbackMethod=\"GET\"></Stream></Start>"
+    )
+  end
+
+  test "can render <Stream> with nested <Parameter> elements" do
+    markup =
+      twiml do
+        start do
+          stream url: "wss://example.com/audio" do
+            parameter(name: "CustomerId", value: "12345")
+            parameter(name: "SessionId", value: "abc-123")
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Stream url=\"wss://example.com/audio\"><Parameter name=\"CustomerId\" value=\"12345\" /><Parameter name=\"SessionId\" value=\"abc-123\" /></Stream></Start>"
+    )
+  end
+
+  test "can render the <Stop> verb with <Stream>" do
+    markup =
+      twiml do
+        stop do
+          stream name: "my_stream" do
+          end
+        end
+      end
+
+    assert_twiml(markup, "<Stop><Stream name=\"my_stream\"></Stream></Stop>")
+  end
+
+  test "can render a complete stream flow" do
+    markup =
+      twiml do
+        start do
+          stream url: "wss://example.com/audio", name: "call_stream" do
+          end
+        end
+
+        say("Recording started")
+
+        gather digits: 1 do
+          say("Press 1 to stop recording")
+        end
+
+        stop do
+          stream name: "call_stream" do
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Stream url=\"wss://example.com/audio\" name=\"call_stream\"></Stream></Start><Say>Recording started</Say><Gather digits=\"1\"><Say>Press 1 to stop recording</Say></Gather><Stop><Stream name=\"call_stream\"></Stream></Stop>"
+    )
+  end
+
+  test "can render <Stream> with parameters and attributes" do
+    markup =
+      twiml do
+        start do
+          stream url: "wss://transcription-service.com/audio",
+                 name: "call_transcript",
+                 track: "both_tracks" do
+            parameter(name: "CallSid", value: "CA123456")
+            parameter(name: "Language", value: "en-US")
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Stream url=\"wss://transcription-service.com/audio\" name=\"call_transcript\" track=\"both_tracks\"><Parameter name=\"CallSid\" value=\"CA123456\" /><Parameter name=\"Language\" value=\"en-US\" /></Stream></Start>"
+    )
+  end
+
+  test "can render the <Transcription> verb" do
+    markup =
+      twiml do
+        transcription do
+        end
+      end
+
+    assert_twiml(markup, "<Transcription></Transcription>")
+  end
+
+  test "can render the <Transcription> verb with attributes" do
+    markup =
+      twiml do
+        transcription name: "call_transcript", language: "en-US" do
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Transcription name=\"call_transcript\" language=\"en-US\"></Transcription>"
+    )
+  end
+
+  test "can render the <Transcription> verb with track attribute" do
+    markup =
+      twiml do
+        transcription track: "inbound_track" do
+        end
+      end
+
+    assert_twiml(markup, "<Transcription track=\"inbound_track\"></Transcription>")
+  end
+
+  test "can render the <Transcription> verb with all common attributes" do
+    markup =
+      twiml do
+        transcription name: "live_transcript",
+                      track: "both_tracks",
+                      language: "en-US",
+                      status_callback: "https://example.com/transcription-status",
+                      status_callback_method: "POST" do
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Transcription name=\"live_transcript\" track=\"both_tracks\" language=\"en-US\" statusCallback=\"https://example.com/transcription-status\" statusCallbackMethod=\"POST\"></Transcription>"
+    )
+  end
+
+  test "can render <Transcription> nested inside <Start>" do
+    markup =
+      twiml do
+        start do
+          transcription name: "call_transcript", language: "en-US" do
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Transcription name=\"call_transcript\" language=\"en-US\"></Transcription></Start>"
+    )
+  end
+
+  test "can render <Transcription> with nested <Parameter> elements" do
+    markup =
+      twiml do
+        transcription name: "call_transcript" do
+          parameter(name: "CallSid", value: "CA123456")
+          parameter(name: "AccountSid", value: "AC789012")
+          parameter(name: "CustomField", value: "custom_value")
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Transcription name=\"call_transcript\"><Parameter name=\"CallSid\" value=\"CA123456\" /><Parameter name=\"AccountSid\" value=\"AC789012\" /><Parameter name=\"CustomField\" value=\"custom_value\" /></Transcription>"
+    )
+  end
+
+  test "can render multiple <Transcription> verbs" do
+    markup =
+      twiml do
+        start do
+          transcription name: "inbound_transcript", track: "inbound_track" do
+          end
+
+          transcription name: "outbound_transcript", track: "outbound_track" do
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Transcription name=\"inbound_transcript\" track=\"inbound_track\"></Transcription><Transcription name=\"outbound_transcript\" track=\"outbound_track\"></Transcription></Start>"
+    )
+  end
+
+  test "can render a complete transcription flow" do
+    markup =
+      twiml do
+        start do
+          transcription name: "live_call_transcript",
+                        language: "en-US",
+                        track: "both_tracks" do
+            parameter(name: "CallSid", value: "CA123456")
+            parameter(name: "CustomerName", value: "John Doe")
+          end
+        end
+
+        say("This call is being transcribed for quality assurance")
+
+        gather digits: 1 do
+          say("Press 1 to stop transcription")
+        end
+
+        stop do
+          transcription name: "live_call_transcript" do
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Start><Transcription name=\"live_call_transcript\" language=\"en-US\" track=\"both_tracks\"><Parameter name=\"CallSid\" value=\"CA123456\" /><Parameter name=\"CustomerName\" value=\"John Doe\" /></Transcription></Start><Say>This call is being transcribed for quality assurance</Say><Gather digits=\"1\"><Say>Press 1 to stop transcription</Say></Gather><Stop><Transcription name=\"live_call_transcript\"></Transcription></Stop>"
+    )
+  end
+
+  test "can render <Transcription> with profanity filter" do
+    markup =
+      twiml do
+        transcription name: "filtered_transcript",
+                      profanity_filter: true do
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Transcription name=\"filtered_transcript\" profanityFilter=\"true\"></Transcription>"
+    )
+  end
+
+  test "can render <Transcription> with options as a variable" do
+    options = [name: "dynamic_transcript", language: "es-ES", track: "inbound_track"]
+
+    markup =
+      twiml do
+        transcription options do
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Transcription name=\"dynamic_transcript\" language=\"es-ES\" track=\"inbound_track\"></Transcription>"
+    )
+  end
+
   defp assert_twiml(lhs, rhs) do
     assert lhs == "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response>#{rhs}</Response>"
   end
