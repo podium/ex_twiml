@@ -64,6 +64,27 @@ defmodule ExTwiml do
 
   You'd then need to render this string to the browser.
 
+  ## SSML Support
+
+  Amazon Polly voices support SSML tags inside `<Say>`. Use `prosody` to
+  change the rate, pitch or volume of the speech:
+
+      iex> import ExTwiml
+      ...> twiml do
+      ...>   say voice: "Polly.Joanna" do
+      ...>     prosody rate: "fast" do
+      ...>       text "Press any key to accept."
+      ...>     end
+      ...>   end
+      ...> end
+      "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><Response><Say voice=\\"Polly.Joanna\\"><prosody rate=\\"fast\\">Press any key to accept.</prosody></Say></Response>"
+
+  `prosody` also takes the same string shorthand as `say`:
+
+      say voice: "Polly.Joanna" do
+        prosody "Press any key to accept.", rate: "120%"
+      end
+
   ## Stream Support
 
   How to start unidirectional streaming (audio fork) with `<Start>` and `<Stream>`:
@@ -138,6 +159,12 @@ defmodule ExTwiml do
     :stream,
     :stop,
     :transcription,
+
+    # SSML, nested inside <Say>. Rendered lowercase; see
+    # `ExTwiml.Utilities.create_tag/3`. Attribute values (rate, pitch, volume)
+    # are passed through unvalidated. Those keys are single words, so
+    # `xml_attributes/1` camelizing them leaves them unchanged.
+    :prosody,
 
     # Non-nested
     :say,

@@ -149,6 +149,28 @@ following verbs and nouns:
     - [Body](https://www.twilio.com/docs/api/2010-04-01/twiml/body)
     - [Media](https://www.twilio.com/docs/api/2010-04-01/twiml/media)
 - [Redirect](https://www.twilio.com/docs/api/2010-04-01/twiml/redirect)
+- SSML (inside `Say`, for Amazon Polly voices)
+    - [prosody](https://www.twilio.com/docs/voice/twiml/say/text-speech#ssml-tags)
+
+### SSML
+Use `prosody` inside `say` to change the rate, pitch or volume of Amazon Polly
+speech. SSML element names are rendered lowercase:
+
+```elixir
+twiml do
+  say voice: "Polly.Joanna" do
+    prosody rate: "fast" do
+      text "Incoming call. Press any key to accept."
+    end
+  end
+end
+# => <Say voice="Polly.Joanna"><prosody rate="fast">Incoming call. Press any key to accept.</prosody></Say>
+
+# String shorthand
+say voice: "Polly.Joanna" do
+  prosody "Incoming call.", rate: "120%"
+end
+```
 
 To maximize compatibility with future versions of the TwiML spec, ExTwiml
 **does not** validate the attributes passed to the various verbs to ensure that

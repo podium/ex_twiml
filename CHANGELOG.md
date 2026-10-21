@@ -1,5 +1,18 @@
 # Change Log
 
+## Unreleased
+
+**Added:**
+
+- `prosody` macro for the SSML `<prosody>` element inside `<Say>` (rate, pitch,
+  volume for Amazon Polly voices). SSML element names render lowercase; existing
+  TwiML verbs are still capitalized.
+
+**Possibly breaking:**
+
+- `prosody` is now a reserved name. A `fn` argument named `prosody` inside a
+  `twiml` block raises `ExTwiml.ReservedNameError`, as with the other verbs.
+
 ## [Unreleased](https://github.com/danielberkompas/ex_twiml/tree/HEAD)
 
 [Full Changelog](https://github.com/danielberkompas/ex_twiml/compare/v2.1.2...HEAD)

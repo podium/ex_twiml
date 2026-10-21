@@ -674,6 +674,120 @@ defmodule ExTwimlTest do
     )
   end
 
+  test "can render <prosody> nested inside <Say>" do
+    markup =
+      twiml do
+        say do
+          prosody rate: "fast" do
+            text("Incoming call. Press any key to accept.")
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Say><prosody rate=\"fast\">Incoming call. Press any key to accept.</prosody></Say>"
+    )
+  end
+
+  test "can render <prosody> nested inside <Say> with a voice" do
+    markup =
+      twiml do
+        say voice: "Polly.Joanna" do
+          prosody rate: "fast" do
+            text("Incoming call. Press any key to accept.")
+          end
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Say voice=\"Polly.Joanna\"><prosody rate=\"fast\">Incoming call. Press any key to accept.</prosody></Say>"
+    )
+  end
+
+  test "can render <prosody> with the string shorthand and options" do
+    markup =
+      twiml do
+        say voice: "Polly.Joanna" do
+          prosody("Hello", rate: "120%", pitch: "+5%", volume: "loud")
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Say voice=\"Polly.Joanna\"><prosody rate=\"120%\" pitch=\"+5%\" volume=\"loud\">Hello</prosody></Say>"
+    )
+  end
+
+  test "escapes text inside <prosody>" do
+    markup =
+      twiml do
+        say do
+          prosody("Tom & Jerry <3 \"quotes\"", rate: "slow")
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Say><prosody rate=\"slow\">Tom &amp; Jerry &lt;3 &quot;quotes&quot;</prosody></Say>"
+    )
+  end
+
+  test "can render a variable and interpolated text inside <prosody>" do
+    business = "Acme"
+    options = [rate: "fast"]
+
+    markup =
+      twiml do
+        say do
+          prosody options do
+            text(business)
+          end
+
+          prosody("#{business} call", rate: "slow")
+        end
+      end
+
+    assert_twiml(
+      markup,
+      "<Say><prosody rate=\"fast\">Acme</prosody><prosody rate=\"slow\">Acme call</prosody></Say>"
+    )
+  end
+
+  test "TwiML verbs are still capitalized alongside <prosody>" do
+    markup =
+      twiml do
+        gather digits: 1 do
+          say voice: "Polly.Joanna" do
+            prosody("Press any key.", rate: "fast")
+          end
+        end
+
+        pause(length: 1)
+      end
+
+    assert_twiml(
+      markup,
+      "<Gather digits=\"1\"><Say voice=\"Polly.Joanna\"><prosody rate=\"fast\">Press any key.</prosody></Say></Gather><Pause length=\"1\" />"
+    )
+  end
+
+  test ".twiml treats prosody as a reserved variable name" do
+    ast =
+      quote do
+        twiml do
+          Enum.each([1, 2], fn prosody ->
+            say("#{prosody}")
+          end)
+        end
+      end
+
+    assert_raise ReservedNameError, fn ->
+      Macro.expand(ast, __ENV__)
+    end
+  end
+
   defp assert_twiml(lhs, rhs) do
     assert lhs == "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response>#{rhs}</Response>"
   end

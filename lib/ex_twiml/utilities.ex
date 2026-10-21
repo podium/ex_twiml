@@ -5,6 +5,10 @@ defmodule ExTwiml.Utilities do
 
   import String, only: [downcase: 1, replace: 3]
 
+  # SSML elements nested inside <Say>. Unlike TwiML verbs, these are rendered
+  # with their names lowercase and unchanged.
+  @ssml_elements [:prosody]
+
   @doc """
   Generates an XML tag.
 
@@ -18,12 +22,18 @@ defmodule ExTwiml.Utilities do
 
       iex> ExTwiml.Utilities.create_tag(:closing, :say)
       "</Say>"
+
+      iex> ExTwiml.Utilities.create_tag(:opening, :prosody, [rate: "fast"])
+      "<prosody rate=\\"fast\\">"
   """
   @spec create_tag(atom, atom, Keyword.t()) :: String.t()
   def create_tag(type, name, options \\ []) do
     options = Keyword.merge(defaults(name), options)
-    do_create_tag(type, capitalize(name), xml_attributes(options))
+    do_create_tag(type, tag_name(name), xml_attributes(options))
   end
+
+  defp tag_name(name) when name in @ssml_elements, do: to_string(name)
+  defp tag_name(name), do: capitalize(name)
 
   defp do_create_tag(:self_closed, name, attributes) do
     "<" <> name <> attributes <> " />"
