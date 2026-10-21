@@ -160,15 +160,15 @@ speech. SSML element names are rendered lowercase:
 twiml do
   say voice: "Polly.Joanna" do
     prosody rate: "fast" do
-      text "Podium call. Press any key to accept."
+      text "Incoming call. Press any key to accept."
     end
   end
 end
-# => <Say voice="Polly.Joanna"><prosody rate="fast">Podium call. Press any key to accept.</prosody></Say>
+# => <Say voice="Polly.Joanna"><prosody rate="fast">Incoming call. Press any key to accept.</prosody></Say>
 
 # String shorthand
 say voice: "Polly.Joanna" do
-  prosody "Podium call.", rate: "120%"
+  prosody "Incoming call.", rate: "120%"
 end
 ```
 

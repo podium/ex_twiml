@@ -679,14 +679,14 @@ defmodule ExTwimlTest do
       twiml do
         say do
           prosody rate: "fast" do
-            text("Podium call. Press any key to accept.")
+            text("Incoming call. Press any key to accept.")
           end
         end
       end
 
     assert_twiml(
       markup,
-      "<Say><prosody rate=\"fast\">Podium call. Press any key to accept.</prosody></Say>"
+      "<Say><prosody rate=\"fast\">Incoming call. Press any key to accept.</prosody></Say>"
     )
   end
 
@@ -695,14 +695,14 @@ defmodule ExTwimlTest do
       twiml do
         say voice: "Polly.Joanna" do
           prosody rate: "fast" do
-            text("Podium call. Press any key to accept.")
+            text("Incoming call. Press any key to accept.")
           end
         end
       end
 
     assert_twiml(
       markup,
-      "<Say voice=\"Polly.Joanna\"><prosody rate=\"fast\">Podium call. Press any key to accept.</prosody></Say>"
+      "<Say voice=\"Polly.Joanna\"><prosody rate=\"fast\">Incoming call. Press any key to accept.</prosody></Say>"
     )
   end
 
@@ -735,7 +735,7 @@ defmodule ExTwimlTest do
   end
 
   test "can render a variable and interpolated text inside <prosody>" do
-    business = "Podium"
+    business = "Acme"
     options = [rate: "fast"]
 
     markup =
@@ -751,7 +751,7 @@ defmodule ExTwimlTest do
 
     assert_twiml(
       markup,
-      "<Say><prosody rate=\"fast\">Podium</prosody><prosody rate=\"slow\">Podium call</prosody></Say>"
+      "<Say><prosody rate=\"fast\">Acme</prosody><prosody rate=\"slow\">Acme call</prosody></Say>"
     )
   end
 
