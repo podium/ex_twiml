@@ -5,14 +5,18 @@ defmodule ExTwiml.Mixfile do
     [
       app: :ex_twiml,
       description: "Generate TwiML with Elixir",
-      version: "2.3.3",
-      elixir: "~> 1.0",
+      version: "2.3.4-podium",
+      elixir: "~> 1.15",
       deps: deps(),
+      aliases: aliases(),
       dialyzer: [
-        plt_file: "#{System.get_env("HOME")}/#{plt_filename()}",
-        flags: ["--no_native", "-Wno_match", "-Wno_return"]
+        plt_add_apps: [:ex_unit, :mix],
+        ignore_warnings: ".dialyzer.ignore-warnings",
+        list_unused_filters: true,
+        plt_local_path: System.get_env("PLT_LOCAL_PATH")
       ],
-      package: package()
+      package: package(),
+      test_coverage: [summary: [threshold: 80]]
     ]
   end
 
@@ -20,7 +24,13 @@ defmodule ExTwiml.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [extra_applications: [:logger]]
+  end
+
+  def cli do
+    [
+      preferred_envs: [precommit: :test]
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -34,31 +44,33 @@ defmodule ExTwiml.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:credo, "~> 1.6", only: [:dev, :test]},
-      {:ex_doc, ">= 0.0.0", only: [:dev, :docs]},
-      {:inch_ex, ">= 0.0.0", only: :docs}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.38", only: [:dev, :docs]}
     ]
   end
 
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"],
-      maintainers: ["Daniel Berkompas"],
+      maintainers: ["Podium"],
       licenses: ["MIT"],
       links: %{
-        "Github" => "https://github.com/danielberkompas/ex_twiml"
+        "Github" => "https://github.com/podium/ex_twiml"
       }
     ]
   end
 
-  defp plt_filename do
-    "elixir-#{System.version()}_#{otp_release()}.plt"
-  end
-
-  defp otp_release do
-    case System.get_env("TRAVIS_OTP_RELEASE") do
-      nil -> :erlang.system_info(:otp_release)
-      release -> release
-    end
+  defp aliases() do
+    [
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --unused",
+        "format",
+        "dialyzer",
+        "credo --strict",
+        "test --cover"
+      ]
+    ]
   end
 end

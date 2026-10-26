@@ -1,0 +1,24 @@
+repos:
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.exs?$
+      - id: end-of-file-fixer
+        exclude: \.exs?$
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: fix-byte-order-marker
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+
+  - repo: local
+    hooks:
+      - id: mix-precommit
+        name: mix precommit
+        entry: mix precommit
+        language: system
+        files: (\.exs?|mix\.lock)$
+        pass_filenames: false
